@@ -1,39 +1,138 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>SMILE AI Web Exchange</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="config.js"></script>
-  <script src="script.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💜 SMILE AI Web Exchange</title>
+<link rel="stylesheet" href="style.css">
+<style>
+    body {
+        margin: 0;
+        font-family: "Pretendard", sans-serif;
+        background: linear-gradient(135deg, #3b0066, #7b00ff);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: white;
+    }
+    .container {
+        width: 380px;
+        padding: 30px;
+        background: rgba(10, 10, 25, 0.55);
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(6px);
+        text-align: center;
+    }
+    select, input {
+        width: 92%;
+        padding: 12px;
+        margin-top: 12px;
+        border-radius: 8px;
+        border: none;
+        font-size: 16px;
+        text-align: center;
+    }
+    .btn-calc {
+        width: 95%;
+        margin-top: 18px;
+        padding: 13px;
+        font-size: 18px;
+        font-weight: 600;
+        color: white;
+        background: #bd24ff;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.25s;
+    }
+    .btn-calc:hover {
+        background: #9b00d1;
+    }
+    .result-box {
+        margin-top: 17px;
+        font-size: 14px;
+        background: rgba(255,255,255,0.13);
+        padding: 13px;
+        border-radius: 8px;
+        text-align: left;
+        white-space: pre-line;
+    }
+</style>
 </head>
-<body class="bg">
-  <div class="overlay"></div>
-  <div class="container">
-    <div class="card">
-      <h1>💜 SMILE AI Web Exchange</h1>
-      <p class="subtitle">빗썸 기준 USDT ↔ KRW 환전 (수수료 1%)</p>
 
-      <label>환전 방향</label>
-      <select id="direction">
-        <option value="USDT_TO_KRW">USDT → KRW</option>
-        <option value="KRW_TO_USDT">KRW → USDT</option>
-      </select>
+<body>
+<div class="container">
+    <h2>💜 SMILE AI Web Exchange</h2>
+    <p style="font-size:13px;">기준: USDT ↔ KRW 환전 (수수료 1%)</p>
 
-      <label>금액 입력</label>
-      <input id="amount" type="number" placeholder="예: 100 (USDT 또는 KRW)" />
+    <select id="direction">
+        <option value="USDT → KRW">USDT → KRW</option>
+        <option value="KRW → USDT">KRW → USDT</option>
+    </select>
 
-      <button onclick="sendCalc()">계산하기</button>
+    <input type="number" id="amount" placeholder="금액 입력 (예: 500)" />
 
-      <div class="result-box">
-        <h3>📊 계산 결과</h3>
-        <pre id="result">아직 계산 전입니다.</pre>
-      </div>
+    <button class="btn-calc" onclick="calculate(); sendToWebhook();">
+        계산하기
+    </button>
 
-      <p class="footnote">
-        * 현재 버전은 <b>테스트 전용</b>입니다. 실제 환전은 관리자를 통해 최종 확인됩니다.
-      </p>
+    <div class="result-box" id="result">
+        계산 결과가 여기 표시됩니다.
     </div>
-  </div>
+</div>
+
+<script>
+function calculate() {
+    const direction = document.querySelector("#direction").value;
+    const amount = parseFloat(document.querySelector("#amount").value);
+    const resultBox = document.querySelector("#result");
+
+    if (!amount || amount <= 0) {
+        resultBox.innerText = "❗ 금액을 정확히 입력해주세요.";
+        return;
+    }
+
+    const rate = 1480; // 환율 고정 (예시)
+    const feeRate = 0.01;
+
+    let resultText = "";
+    if (direction === "USDT → KRW") {
+        const krw = amount * rate;
+        const fee = krw * feeRate;
+        const finalKRW = krw - fee;
+        resultText = `📌기준: USDT → 원화(KRW)\n📌수량: ${amount} USDT\n📌원화 환산: ${(krw).toLocaleString()} KRW\n📌수수료 (1%): -${fee.toLocaleString()} KRW\n📌💰실수령: ${finalKRW.toLocaleString()} KRW`;
+    } else {
+        const usdt = amount / rate;
+        const fee = usdt * feeRate;
+        const finalUSDT = usdt - fee;
+        resultText = `📌기준: KRW → USDT\n📌금액: ${amount.toLocaleString()} KRW\n📌USDT 환산: ${usdt.toFixed(4)} USDT\n📌수수료 (1%): -${fee.toFixed(4)} USDT\n📌💰실수령: ${finalUSDT.toFixed(4)} USDT`;
+    }
+    resultBox.innerText = resultText;
+}
+</script>
+
+<script>
+function sendToWebhook() {
+    const direction = document.querySelector("#direction").value;
+    const amount = document.querySelector("#amount").value;
+
+    const webhookUrl = "https://smile8822.app.n8n.cloud/webhook/smile_exchange_prod";
+
+    fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            direction: direction,
+            amount: amount,
+            reqFrom: "WEB"
+        })
+    })
+    .then(res => console.log("Webhook sent:", res.status))
+    .catch(err => console.error("Webhook error:", err));
+}
+</script>
+
 </body>
 </html>
