@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>SMILE AI Web Exchange</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="config.js"></script>
+  <script src="script.js" defer></script>
+</head>
+<body class="bg">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="card">
+      <h1>💜 SMILE AI Web Exchange</h1>
+      <p class="subtitle">빗썸 기준 USDT ↔ KRW 환전 (수수료 1%)</p>
+
+      <label>환전 방향</label>
+      <select id="direction">
+        <option value="USDT_TO_KRW">USDT → KRW</option>
+        <option value="KRW_TO_USDT">KRW → USDT</option>
+      </select>
+
+      <label>금액 입력</label>
+      <input id="amount" type="number" placeholder="예: 100 (USDT 또는 KRW)" />
+
+      <button onclick="sendCalc()">계산하기</button>
+
+      <div class="result-box">
+        <h3>📊 계산 결과</h3>
+        <pre id="result">아직 계산 전입니다.</pre>
+      </div>
+
+      <p class="footnote">
+        * 현재 버전은 <b>테스트 전용</b>입니다. 실제 환전은 관리자를 통해 최종 확인됩니다.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

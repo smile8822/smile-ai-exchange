@@ -1,0 +1,6 @@
+services:
+  - type: static
+    name: smile-ai-exchange
+    env: static
+    buildCommand: ""
+    staticPublishPath: .
